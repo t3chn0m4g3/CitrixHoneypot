@@ -10,6 +10,7 @@ import logging.handlers
 import os
 import sys
 import urllib.parse
+from pythonjsonlogger import jsonlogger
 
 # Set to True to detect failed directory traversal attempts and reward our friendly failed hacker with a gold star!
 struggle_check = False
@@ -138,7 +139,8 @@ class CitrixHandler(server.SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     handler1 = logging.handlers.WatchedFileHandler(os.environ.get("LOGFILE", "logs/server.log"))
     handler2 = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s')
+    format_str = '(asctime)(levelname)%(message)%'
+    formatter = jsonlogger.JsonFormatter(format_str)
     handler1.setFormatter(formatter)
     handler2.setFormatter(formatter)
     root = logging.getLogger()
