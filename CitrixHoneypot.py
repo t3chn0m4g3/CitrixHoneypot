@@ -139,7 +139,7 @@ class CitrixHandler(server.SimpleHTTPRequestHandler):
 if __name__ == '__main__':
     handler1 = logging.handlers.WatchedFileHandler(os.environ.get("LOGFILE", "logs/server.log"))
     handler2 = logging.StreamHandler(sys.stdout)
-    format_str = '(asctime)(levelname)%(message)%'
+    format_str = '%(asctime)s %(levelname)s %(message)s'
     formatter = jsonlogger.JsonFormatter(format_str)
     handler1.setFormatter(formatter)
     handler2.setFormatter(formatter)
@@ -150,9 +150,11 @@ if __name__ == '__main__':
 
 logging.log(logging.INFO, 'Citrix CVE-2019-19781 Honeypot by MalwareTech')
 
+# Create SSL context
+ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+ssl_context.load_cert_chain(certfile='ssl/cert.pem', keyfile='ssl/key.pem')
+
+# Bind the SSL context to the server
 httpd = server.HTTPServer(('0.0.0.0', 443), CitrixHandler)
-httpd.socket = ssl.wrap_socket(httpd.socket,
-                               certfile='ssl/cert.pem',
-                               keyfile='ssl/key.pem',
-                               server_side=True)
+httpd.socket = ssl_context.wrap_socket(httpd.socket, server_side=True)
 httpd.serve_forever()
